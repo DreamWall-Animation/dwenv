@@ -9,7 +9,7 @@ Launch applications with environment variables from multiple config files.
 python dwenv/launcher.py --config `maya_np.env` --executable maya
 
 * `maya_np.env` content:
-    ```yaml
+    ```
     np_configs_dir/prod.envc
     np_configs_dir/maya.envc
     np_configs_dir/animschoolpicker.envc
