@@ -17,7 +17,7 @@ python dwenv/launcher.py --config `maya_np.env` --executable maya
     ```
 
 * `prod.envc` content:
-    ```jade
+    ```
     PROD_NAME = Neti Pikola
     PROD_CODE = NP
     FRAMERATE = 25
@@ -28,14 +28,14 @@ python dwenv/launcher.py --config `maya_np.env` --executable maya
     ```
 
 * `maya.envc` content:
-    ```jade
+    ```
     PATH > ${MAYA_LOCATION}/bin
     MAYA_VP2_DEVICE_OVERRIDE = VirtualDeviceGL
     ...
     ```
 
 * `animschoolpicker.envc` content:
-    ```jade
+    ```
     MAYA_PLUG_IN_PATH.windows > ${SOFTWARE_ROOT}/animschoolpicker/windows/2018
     MAYA_PLUG_IN_PATH.linux > ${SOFTWARE_ROOT}/animschoolpicker/linux/2018
     ...
