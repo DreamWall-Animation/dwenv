@@ -73,7 +73,6 @@ def print_env(env, separator=None):
 
 def extend_env_with_envconfig(
         env, target_platform, config_path, override_warnings=True):
-
     if not os.path.exists(config_path):
         raise ValueError('Config file missing: %s' % config_path)
     if not config_path.endswith('.envc'):
@@ -86,7 +85,7 @@ def extend_env_with_envconfig(
             line = line.strip()
             if not line:
                 continue
-            if line.startswith('//'):
+            if line.startswith(('#', '//')):
                 continue
 
             # Parse for variable, operator, (platform) and value
@@ -150,6 +149,8 @@ def build_env(
 
     # Build from configs:
     for config_path in configs_paths:
+        if config_path.startswith('#'):
+            continue
         config_path = os.path.expandvars(config_path)
         extend_env_with_envconfig(
             env, target_platform, config_path, override_warnings)

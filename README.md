@@ -65,7 +65,7 @@ Each .envc line look like this:\
 - All environment expressions will be expanded if they exists. Thus, the order of the environment configs matter.\
 There is no other dependency trickery. Just list what you need.
 
-- You can comment a line with "`//`".
+- You can comment a line with "`#`".
 
 
 ## As a python module:
