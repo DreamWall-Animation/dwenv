@@ -36,7 +36,7 @@ def launch(
         if PLATFORM == 'linux':
             subprocess.call(command, env=env)
         else:
-            if 'cmd' in str(command):
+            if any(s in executable for s in ('cmd', 'powershell', 'pwsh')):
                 subprocess.call(command, env=env, shell=True)
             else:
                 subprocess.Popen(command, env=env)
