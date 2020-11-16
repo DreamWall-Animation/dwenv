@@ -3,6 +3,7 @@ __author__ = 'Olivier Evers'
 __license__ = 'MIT'
 
 
+import os
 import sys
 import shlex
 import subprocess
@@ -42,6 +43,11 @@ def launch(
                 subprocess.Popen(command, env=env)
     except TypeError:
         pprint.pprint(env)
+        raise
+    except FileNotFoundError:
+        print('Failed to launch following command:')
+        print(command)
+        print('PATH =', env['PATH'].split(os.pathsep))
         raise
 
 
