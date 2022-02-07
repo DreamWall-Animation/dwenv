@@ -34,14 +34,14 @@ def get_separator(platform=PLATFORM):
 
 
 def get_start_env(from_current_env=True, start_env=None, keys_to_remove=None):
-    if from_current_env:
-        env = os.environ.copy()
-        if keys_to_remove:
-            for k in keys_to_remove:
-                env.pop(k, None)
-        return env
-    else:
+    if not from_current_env:
         return start_env or {}
+
+    env = os.environ.copy()
+    if keys_to_remove:
+        for k in keys_to_remove:
+            env.pop(k, None)
+    return env
 
 
 def conform_configs_paths_var(configs_paths):
@@ -118,7 +118,8 @@ def extend_env_with_envconfig(
             else:
                 # Check that variable exists:
                 if variable not in env:
-                    env[variable] = ''
+                    env[variable] = value
+                    continue
                 # Check that value doesn't exist:
                 elif value in env[variable].split(separator):
                     continue
