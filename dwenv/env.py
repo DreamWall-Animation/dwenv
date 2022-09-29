@@ -150,6 +150,8 @@ def build_env(
 
     # Build from configs:
     for config_path in configs_paths:
+        if not config_path:
+            continue
         if config_path.startswith('#'):
             continue
         config_path = os.path.expandvars(config_path)
