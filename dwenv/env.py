@@ -159,7 +159,7 @@ def build_env(
             env, target_platform, config_path, override_warnings)
 
     # Update PATH to make sure executable is found
-    for path in env['PATH'].split(separator):
+    for path in env.get('PATH', '').split(separator):
         if path not in os.environ['PATH']:
             os.environ['PATH'] += separator + path
 
