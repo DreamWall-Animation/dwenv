@@ -10,6 +10,7 @@ from platform import system
 
 
 PLATFORM = system().lower()
+COMMENT_SYMBOLS = '#', '//'
 
 
 def expand_variables(path, env):
@@ -38,7 +39,7 @@ def get_start_env(from_current_env=True, start_env=None, vars_to_remove=None):
 
 def _check_config_file_exists(config_path):
     if not os.path.exists(config_path):
-        raise ValueError('Config file missing: %s' % config_path)
+        raise FileNotFoundError('Config file missing: %s' % config_path)
 
 
 def conform_configs_paths_var(configs_paths):
@@ -48,7 +49,7 @@ def conform_configs_paths_var(configs_paths):
     if it's is a single .envc file, it will return it as a single item list.
     """
     if isinstance(configs_paths, (list, set, tuple)):
-        [_check_config_file_exists(p) for p in configs_paths]
+        [_check_config_file_exists(p) for p in configs_paths if p]
         return configs_paths
     elif configs_paths.endswith('.envc'):
         _check_config_file_exists(configs_paths)
@@ -56,12 +57,14 @@ def conform_configs_paths_var(configs_paths):
     elif configs_paths.endswith('.env'):
         _check_config_file_exists(configs_paths)
         with open(configs_paths, 'r') as f:
-            return [l.strip() for l in f.readlines() if l]
+            return [
+                l.strip() for l in f.readlines() if l and
+                not l.startswith(COMMENT_SYMBOLS)]
     else:
-        raise ValueError('Wrong value passed for configs_paths')
+        raise ValueError('Wrong extension for configs_paths')
 
 
-def print_env(env, separator=None):
+def print_env(env, separator=None):  # pragma: no cover
     separator = separator or get_separator()
     for var in sorted(env.keys()):
         print('\n' + var)
@@ -71,10 +74,6 @@ def print_env(env, separator=None):
 
 def extend_env_with_envconfig(
         env, target_platform, config_path, override_warnings=True):
-    if not os.path.exists(config_path):
-        raise ValueError('Config file missing: %s' % config_path)
-    if not config_path.endswith('.envc'):
-        raise ValueError('Wrong file extension: %s' % config_path)
 
     separator = get_separator(target_platform)
 
@@ -83,7 +82,7 @@ def extend_env_with_envconfig(
             line = line.strip()
             if not line:
                 continue
-            if line.startswith(('#', '//')):
+            if line.startswith(COMMENT_SYMBOLS):
                 continue
 
             # Parse for variable, operator, (platform) and value
@@ -91,20 +90,15 @@ def extend_env_with_envconfig(
                 variable, operator, value = re.split(
                     r'(\s=\s|\s>\s|\s<\s)', line)
             except ValueError:
-                print('Wrong input: %s' % line)
-                raise
+                raise ValueError('Wrong input in config: %s' % line)
             try:
-                variable, platform = re.split(r'\.', variable)
+                variable, var_platform = re.split(r'\.', variable)
             except ValueError:
-                platform = None
+                var_platform = None
 
             # Skip values for other platforms:
-            if platform is not None and platform != target_platform:
+            if not(target_platform == var_platform or var_platform is None):
                 continue
-
-            # Check operator value
-            if operator not in (' = ', ' > ', ' < '):
-                raise ValueError('Unknown operator "%s"' % operator)
 
             # Inject variable
             value = expand_variables(value, env)
@@ -144,27 +138,19 @@ def build_env(
         configs_paths = os.environ['DWENV_CONFIG']
     elif isinstance(configs_paths, str):
         env['DWENV_CONFIG'] = configs_paths
+
     configs_paths = conform_configs_paths_var(configs_paths)
 
     # Build from configs:
     for config_path in configs_paths:
-        if not config_path:
-            continue
-        if config_path.startswith('#'):
-            continue
         config_path = os.path.expandvars(config_path)
         extend_env_with_envconfig(
             env, target_platform, config_path, override_warnings)
 
-    # Update PATH to make sure executable is found
-    for path in env.get('PATH', '').split(separator):
-        if path not in os.environ['PATH']:
-            os.environ['PATH'] += separator + path
-
     # Force string type
     env = {str(k): str(v) for k, v in env.items()}
 
-    if verbose:
+    if verbose:  # pragma: no cover
         print_env(env, separator)
 
     return env

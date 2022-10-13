@@ -1,3 +1,10 @@
 NEW_VAR = test
+# Comment1
+//Comment2
+
+PLATFORMVAR.linux = linuxvar
+PLATFORMVAR.windows = windowsvar
+
 PATH > appended
+
 PATH < prepended
