@@ -111,3 +111,15 @@ def test_remove_key():
     env = dwenv.build_env(
         f'{configs_path}/test_env1.env', vars_to_remove=[var])
     assert var not in env
+
+
+@reset_env()
+def test_selected_vars():
+    var, value = 'SOME_ENV', 'abc'
+    os.environ[var] = value
+    env = dwenv.build_env(f'{configs_path}/test_env1.env')
+    assert env[var] == value
+    env = dwenv.build_env(
+        f'{configs_path}/test_env1.env', initial_vars=[var])
+    assert len(env) == 5
+    assert env[var] == value

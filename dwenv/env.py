@@ -26,14 +26,23 @@ def get_separator(platform=PLATFORM):
         return ':'
 
 
-def get_start_env(from_current_env=True, start_env=None, vars_to_remove=None):
+def get_start_env(
+        from_current_env=True,
+        start_env=None,
+        vars_to_remove=None,
+        initial_vars=None):
     if not from_current_env:
-        return start_env or {}
+        env = start_env or {}
+    else:
+        env = os.environ.copy()
 
-    env = os.environ.copy()
     if vars_to_remove:
-        for k in vars_to_remove:
-            env.pop(k, None)
+        for var in vars_to_remove:
+            env.pop(var, None)
+
+    if initial_vars:
+        env = {var: env[var] for var in initial_vars}
+
     return env
 
 
@@ -123,15 +132,21 @@ def extend_env_with_envconfig(
 
 
 def build_env(
-        configs_paths=None, from_current_env=True, start_env=None,
-        vars_to_remove=None, override_warnings=True, target_platform=None,
+        configs_paths=None,
+        from_current_env=True,
+        start_env=None,
+        vars_to_remove=None,
+        initial_vars=None,
+        override_warnings=True,
+        target_platform=None,
         verbose=False):
     """
     configs_path: you can pass a single .env config path or a list of .envc's
     """
     target_platform = target_platform or PLATFORM
     separator = get_separator(target_platform)
-    env = get_start_env(from_current_env, start_env, vars_to_remove)
+    env = get_start_env(
+        from_current_env, start_env, vars_to_remove, initial_vars)
 
     if configs_paths is None:
         # Use DWENV_CONFIG value if no configs_paths provided:
