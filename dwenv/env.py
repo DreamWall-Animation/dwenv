@@ -41,7 +41,7 @@ def get_start_env(
             env.pop(var, None)
 
     if initial_vars:
-        env = {var: env[var] for var in initial_vars}
+        env = {var: os.environ[var] for var in initial_vars}
 
     return env
 
