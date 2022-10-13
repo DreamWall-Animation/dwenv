@@ -1,0 +1,1 @@
+py -m pytest tests/test_dwenv.py --capture=no --maxfail=1 --cov=dwenv --cov-report term-missing

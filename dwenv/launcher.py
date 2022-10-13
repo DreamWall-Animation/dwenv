@@ -9,7 +9,7 @@ import shlex
 import subprocess
 import pprint
 
-from env import build_env, PLATFORM, is_string
+from env import build_env, PLATFORM
 
 
 sys.dont_write_bytecode = True
@@ -17,9 +17,9 @@ sys.dont_write_bytecode = True
 
 def launch(
         executable, arguments=None, env_configs=None, from_current_env=True,
-        keys_to_remove=None, dry=False):
+        vars_to_remove=None, dry=False):
     # Build command line:
-    if is_string(arguments):
+    if not isinstance(arguments, list):
         arguments = shlex.split(arguments)
     elif arguments is None:
         arguments = []
@@ -28,7 +28,7 @@ def launch(
     # Build env:
     env = build_env(
         env_configs, from_current_env=from_current_env,
-        keys_to_remove=keys_to_remove, override_warnings=True, verbose=dry)
+        vars_to_remove=vars_to_remove, override_warnings=True, verbose=dry)
 
     # Launch:
     if dry:

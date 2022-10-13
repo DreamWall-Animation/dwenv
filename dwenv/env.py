@@ -18,14 +18,6 @@ def expand_variables(path, env):
     return path
 
 
-def is_string(var):
-    """For Python2/3 compatiblity"""
-    if sys.version_info >= (3, 0):
-        return isinstance(var, str)
-    else:
-        return isinstance(var, basestring)
-
-
 def get_separator(platform=PLATFORM):
     if platform == 'windows':
         return ';'
@@ -33,15 +25,20 @@ def get_separator(platform=PLATFORM):
         return ':'
 
 
-def get_start_env(from_current_env=True, start_env=None, keys_to_remove=None):
+def get_start_env(from_current_env=True, start_env=None, vars_to_remove=None):
     if not from_current_env:
         return start_env or {}
 
     env = os.environ.copy()
-    if keys_to_remove:
-        for k in keys_to_remove:
+    if vars_to_remove:
+        for k in vars_to_remove:
             env.pop(k, None)
     return env
+
+
+def _check_config_file_exists(config_path):
+    if not os.path.exists(config_path):
+        raise ValueError('Config file missing: %s' % config_path)
 
 
 def conform_configs_paths_var(configs_paths):
@@ -50,13 +47,14 @@ def conform_configs_paths_var(configs_paths):
     if configs_paths is a single .env file, it will return its content.
     if it's is a single .envc file, it will return it as a single item list.
     """
-    if not is_string(configs_paths):
+    if isinstance(configs_paths, (list, set, tuple)):
+        [_check_config_file_exists(p) for p in configs_paths]
         return configs_paths
     elif configs_paths.endswith('.envc'):
+        _check_config_file_exists(configs_paths)
         return [configs_paths]
     elif configs_paths.endswith('.env'):
-        if not os.path.exists(configs_paths):
-            raise ValueError('Config file missing: %s' % configs_paths)
+        _check_config_file_exists(configs_paths)
         with open(configs_paths, 'r') as f:
             return [l.strip() for l in f.readlines() if l]
     else:
@@ -132,19 +130,19 @@ def extend_env_with_envconfig(
 
 def build_env(
         configs_paths=None, from_current_env=True, start_env=None,
-        keys_to_remove=None, override_warnings=True, target_platform=None,
+        vars_to_remove=None, override_warnings=True, target_platform=None,
         verbose=False):
     """
     configs_path: you can pass a single .env config path or a list of .envc's
     """
     target_platform = target_platform or PLATFORM
     separator = get_separator(target_platform)
-    env = get_start_env(from_current_env, start_env, keys_to_remove)
+    env = get_start_env(from_current_env, start_env, vars_to_remove)
 
     if configs_paths is None:
         # Use DWENV_CONFIG value if no configs_paths provided:
         configs_paths = os.environ['DWENV_CONFIG']
-    else:
+    elif isinstance(configs_paths, str):
         env['DWENV_CONFIG'] = configs_paths
     configs_paths = conform_configs_paths_var(configs_paths)
 

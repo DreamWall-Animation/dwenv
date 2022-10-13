@@ -73,6 +73,6 @@ There is no other dependency trickery. Just list what you need.
 import dwenv.env
 env = dwenv.env.build_env(
         configs_paths=None, from_current_env=True, start_env=None,
-        keys_to_remove=None, override_warnings=False, target_platform=None)
+        vars_to_remove=None, override_warnings=False, target_platform=None)
 ```
 Using `launcher.py` or `build_env` function will also set DWENV_CONFIG var to know which config was used to generate the environment. You can then later re-use this path together with the `target_platform` argument if you need to send a job on another platform.
