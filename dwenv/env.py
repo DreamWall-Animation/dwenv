@@ -5,7 +5,6 @@ __license__ = 'MIT'
 
 import os
 import re
-import sys
 from platform import system
 
 
@@ -48,7 +47,7 @@ def get_start_env(
 
 def _check_config_file_exists(config_path):
     if not os.path.exists(config_path):
-        raise FileNotFoundError('Config file missing: %s' % config_path)
+        raise FileNotFoundError(f'Config file missing: {config_path}')
 
 
 def conform_configs_paths_var(configs_paths):
@@ -99,22 +98,23 @@ def extend_env_with_envconfig(
                 variable, operator, value = re.split(
                     r'(\s=\s|\s>\s|\s<\s)', line)
             except ValueError:
-                raise ValueError('Wrong input in config: %s' % line)
+                raise ValueError(f'Wrong input in config: {line}')
             try:
                 variable, var_platform = re.split(r'\.', variable)
             except ValueError:
                 var_platform = None
 
             # Skip values for other platforms:
-            if not(target_platform == var_platform or var_platform is None):
+            if not (target_platform == var_platform or var_platform is None):
                 continue
 
             # Inject variable
             value = expand_variables(value, env)
             if operator == ' = ':
                 if override_warnings and variable in env:
-                    print('WARNING: "%s" replacing existing variable "%s".' % (
-                        os.path.basename(config_path), variable))
+                    print(
+                        f'WARNING: "{os.path.basename(config_path)}" '
+                        f'replacing existing variable "{variable}".')
                 env[variable] = value
             else:
                 # Check that variable exists:
