@@ -66,8 +66,9 @@ def conform_configs_paths_var(configs_paths):
         _check_config_file_exists(configs_paths)
         with open(configs_paths, 'r') as f:
             return [
-                l.strip() for l in f.readlines() if l and
-                not l.startswith(COMMENT_SYMBOLS) if l.strip()]
+                l.strip() for l in f.readlines() if
+                l.strip() and
+                not l.startswith(COMMENT_SYMBOLS)]
     else:
         raise ValueError('Wrong extension for configs_paths')
 
