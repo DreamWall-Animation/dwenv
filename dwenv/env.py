@@ -67,7 +67,7 @@ def conform_configs_paths_var(configs_paths):
         with open(configs_paths, 'r') as f:
             return [
                 l.strip() for l in f.readlines() if l and
-                not l.startswith(COMMENT_SYMBOLS)]
+                not l.startswith(COMMENT_SYMBOLS) if l.strip()]
     else:
         raise ValueError('Wrong extension for configs_paths')
 
