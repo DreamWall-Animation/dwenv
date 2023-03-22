@@ -13,6 +13,7 @@ COMMENT_SYMBOLS = '#', '//'
 
 
 def expand_variables(path, env):
+    path = os.path.expanduser(path)
     for k, v in env.items():
         path = path.replace('${%s}' % k, v)
     return path
