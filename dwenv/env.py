@@ -57,9 +57,11 @@ def get_start_env(
     return env
 
 
-def _check_config_file_exists(config_path):
+def _expand_and_check_exists(config_path):
+    config_path = os.path.expandvars(config_path)
     if not os.path.exists(config_path):
         raise FileNotFoundError(f'Config file missing: {config_path}')
+    return config_path
 
 
 def conform_configs_paths_var(configs_paths):
@@ -69,13 +71,12 @@ def conform_configs_paths_var(configs_paths):
     if it's is a single .envc file, it will return it as a single item list.
     """
     if isinstance(configs_paths, (list, set, tuple)):
-        [_check_config_file_exists(p) for p in configs_paths if p]
-        return configs_paths
+        return [_expand_and_check_exists(p) for p in configs_paths if p]
     elif configs_paths.endswith('.envc'):
-        _check_config_file_exists(configs_paths)
+        configs_paths = _expand_and_check_exists(configs_paths)
         return [configs_paths]
     elif configs_paths.endswith('.env'):
-        _check_config_file_exists(configs_paths)
+        configs_paths = _expand_and_check_exists(configs_paths)
         with open(configs_paths, 'r') as f:
             return [
                 line.strip() for line in f.readlines() if
@@ -172,7 +173,6 @@ def build_env(
 
     # Build from configs:
     for config_path in configs_paths:
-        config_path = os.path.expandvars(config_path)
         extend_env_with_envconfig(
             env, target_platform, config_path, override_warnings)
 
