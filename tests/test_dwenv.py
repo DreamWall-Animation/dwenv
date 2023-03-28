@@ -1,5 +1,5 @@
 import os
-from os.path import dirname, normpath
+from os.path import dirname, normpath, expandvars
 from contextlib import contextmanager
 import pytest
 import dwenv
@@ -22,7 +22,8 @@ def test_conform_configs_paths_var():
         f'{configs_path}/test_env1.env')
     assert isinstance(paths, list)
     assert len(paths) == 1
-    assert normpath(paths[0]) == normpath('${CONFIGS_ROOT}/cfg1.envc')
+    assert normpath(paths[0]) == normpath(
+        expandvars('${CONFIGS_ROOT}/cfg1.envc'))
     #
     paths = dwenv.env.conform_configs_paths_var(
         f'{configs_path}/cfg1.envc')
@@ -90,7 +91,7 @@ def test_not_from_current_env(target_platform):
     random_var = list(os.environ.keys())[0]
     assert random_var != 'NEW_VAR'
     env = dwenv.build_env(
-        f'{configs_path}/test_env1.env', from_current_env=False,
+        f'{configs_path}/test_env1.env', start_env=None,
         target_platform=target_platform)
     assert env['NEW_VAR'] == 'test'
     assert env['PATH'].endswith('appended')
@@ -100,6 +101,29 @@ def test_not_from_current_env(target_platform):
         assert env['PLATFORMVAR'] == 'linuxvar'
     elif target_platform == 'windows':
         assert env['PLATFORMVAR'] == 'windowsvar'
+
+
+@reset_env()
+@pytest.mark.parametrize('target_platform', [None, 'windows', 'linux'])
+def test_custom_env(target_platform):
+    random_var = list(os.environ.keys())[0]
+    assert random_var != 'NEW_VAR'
+    env = dwenv.build_env(
+        f'{configs_path}/test_env1.env',
+        start_env=dict(X='a'),
+        target_platform=target_platform)
+    assert env['X'] == 'a'
+    env = dwenv.build_env(
+        f'{configs_path}/test_env1.env',
+        start_env='$CONFIGS_ROOT/env.json',
+        target_platform=target_platform,
+        start_env_backup_path='$CONFIGS_ROOT/dump_test.json')
+    assert env['X'] == 'a'
+    env = dwenv.build_env(
+        f'{configs_path}/test_env1.env',
+        target_platform=target_platform,
+        set_current_env=True)
+    assert os.environ['NEW_VAR'] == 'test'
 
 
 @reset_env()

@@ -1,2 +1,3 @@
 *.pyc
 .coverage
+tests/configs/dump_test.json

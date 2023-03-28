@@ -38,13 +38,13 @@ def get_start_env(
     elif isinstance(start_env, dict):
         env = start_env
     elif isinstance(start_env, str):
-        with open(start_env, 'r') as f:
+        with open(os.path.expandvars(start_env), 'r') as f:
             env = json.load(f)
     else:
         env = {}
 
     if start_env_backup_path:
-        with open(start_env_backup_path, 'w') as f:
+        with open(os.path.expandvars(start_env_backup_path), 'w') as f:
             json.dump(env, f)
 
     if vars_to_remove:
@@ -79,9 +79,9 @@ def conform_configs_paths_var(configs_paths):
         configs_paths = _expand_and_check_exists(configs_paths)
         with open(configs_paths, 'r') as f:
             return [
-                line.strip() for line in f.readlines() if
-                line.strip() and
-                not line.startswith(COMMENT_SYMBOLS)]
+                _expand_and_check_exists(ln.strip()) for ln in f.readlines() if
+                ln.strip() and
+                not ln.startswith(COMMENT_SYMBOLS)]
     else:
         raise ValueError('Wrong extension for configs_paths')
 
