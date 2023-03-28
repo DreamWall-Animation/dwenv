@@ -5,6 +5,7 @@ __license__ = 'MIT'
 
 import os
 import re
+import json
 from platform import system
 
 
@@ -27,14 +28,24 @@ def get_separator(platform=PLATFORM):
 
 
 def get_start_env(
-        from_current_env=True,
-        start_env=None,
+        start_env='current',
         vars_to_remove=None,
-        initial_vars=None):
-    if not from_current_env:
-        env = start_env or {}
-    else:
+        initial_vars=None,
+        start_env_backup_path=None):
+
+    if start_env == 'current':
         env = os.environ.copy()
+    elif isinstance(start_env, dict):
+        env = start_env
+    elif isinstance(start_env, str):
+        with open(start_env, 'r') as f:
+            env = json.load(f)
+    else:
+        env = {}
+
+    if start_env_backup_path:
+        with open(start_env_backup_path, 'w') as f:
+            json.dump(env, f)
 
     if vars_to_remove:
         for var in vars_to_remove:
@@ -67,9 +78,9 @@ def conform_configs_paths_var(configs_paths):
         _check_config_file_exists(configs_paths)
         with open(configs_paths, 'r') as f:
             return [
-                l.strip() for l in f.readlines() if
-                l.strip() and
-                not l.startswith(COMMENT_SYMBOLS)]
+                line.strip() for line in f.readlines() if
+                line.strip() and
+                not line.startswith(COMMENT_SYMBOLS)]
     else:
         raise ValueError('Wrong extension for configs_paths')
 
@@ -135,12 +146,13 @@ def extend_env_with_envconfig(
 
 def build_env(
         configs_paths=None,
-        from_current_env=True,
-        start_env=None,
+        start_env='current',
         vars_to_remove=None,
         initial_vars=None,
         override_warnings=True,
         target_platform=None,
+        start_env_backup_path=None,
+        set_current_env=False,
         verbose=False):
     """
     configs_path: you can pass a single .env config path or a list of .envc's
@@ -148,7 +160,7 @@ def build_env(
     target_platform = target_platform or PLATFORM
     separator = get_separator(target_platform)
     env = get_start_env(
-        from_current_env, start_env, vars_to_remove, initial_vars)
+        start_env, vars_to_remove, initial_vars, start_env_backup_path)
 
     if configs_paths is None:
         # Use DWENV_CONFIG value if no configs_paths provided:
@@ -166,6 +178,10 @@ def build_env(
 
     # Force string type
     env = {str(k): str(v) for k, v in env.items()}
+
+    if set_current_env:
+        os.environ.clear()
+        os.environ.update(env)
 
     if verbose:  # pragma: no cover
         print_env(env, separator)
