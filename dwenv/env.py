@@ -180,8 +180,10 @@ def build_env(
     env = {str(k): str(v) for k, v in env.items()}
 
     if set_current_env:
+        import sys
         os.environ.clear()
         os.environ.update(env)
+        sys.path.extend(env['PYTHONPATH'].split(os.pathsep))
 
     if verbose:  # pragma: no cover
         print_env(env, separator)
