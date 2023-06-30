@@ -86,7 +86,8 @@ def conform_configs_paths_var(configs_paths):
         raise ValueError('Wrong extension for configs_paths')
 
 
-def print_env(env, separator=None):  # pragma: no cover
+def print_env(env=None, separator=None):  # pragma: no cover
+    env = env or os.environ
     separator = separator or get_separator()
     for var in sorted(env.keys()):
         print('\n' + var)
