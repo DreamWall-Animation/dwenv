@@ -16,10 +16,10 @@ sys.dont_write_bytecode = True
 
 
 def launch(
-        executable, arguments=None, env_configs=None, from_current_env=True,
+        executable, arguments=None, env_configs=None, start_env='current',
         vars_to_remove=None, dry=False):
     # Build command line:
-    if not isinstance(arguments, list):
+    if isinstance(arguments, str):
         arguments = shlex.split(arguments)
     elif arguments is None:
         arguments = []
@@ -27,7 +27,7 @@ def launch(
 
     # Build env:
     env = build_env(
-        env_configs, from_current_env=from_current_env,
+        env_configs, start_env=start_env,
         vars_to_remove=vars_to_remove, override_warnings=True, verbose=dry)
 
     # Launch:
@@ -45,9 +45,13 @@ def launch(
         pprint.pprint(env)
         raise
     except FileNotFoundError:
-        print('Failed to launch following command:')
-        print(command)
-        print('PATH =', env['PATH'].split(os.pathsep))
+        print(f'\n\n\nFailed to launch following command: {command}\n')
+        print('Env "PATH" =')
+        print()
+        print(env['PATH'])
+        print()
+        pprint.pprint(env['PATH'].split(os.pathsep))
+        print('\n\n')
         raise
 
 

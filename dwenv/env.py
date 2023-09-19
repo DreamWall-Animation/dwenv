@@ -33,7 +33,7 @@ def get_start_env(
         initial_vars=None,
         start_env_backup_path=None):
 
-    if start_env == 'current':
+    if start_env in ['current', None]:
         env = os.environ.copy()
     elif isinstance(start_env, dict):
         env = start_env
