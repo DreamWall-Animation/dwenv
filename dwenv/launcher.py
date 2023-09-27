@@ -28,7 +28,7 @@ def launch(
     # Build env:
     env = build_env(
         env_configs, start_env=start_env,
-        vars_to_remove=vars_to_remove, override_warnings=True, verbose=dry)
+        vars_to_remove=vars_to_remove, verbose=dry)
 
     # Launch:
     if dry:

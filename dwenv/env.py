@@ -95,8 +95,7 @@ def print_env(env=None, separator=None):  # pragma: no cover
             print(' - ' + path)
 
 
-def extend_env_with_envconfig(
-        env, target_platform, config_path, override_warnings=True):
+def extend_env_with_envconfig(env, target_platform, config_path, verbose=True):
 
     separator = get_separator(target_platform)
 
@@ -126,7 +125,7 @@ def extend_env_with_envconfig(
             # Inject variable
             value = expand_variables(value, env)
             if operator == ' = ':
-                if override_warnings and variable in env:
+                if verbose and variable in env:
                     print(
                         f'WARNING: "{os.path.basename(config_path)}" '
                         f'replacing existing variable "{variable}".')
@@ -151,7 +150,6 @@ def build_env(
         start_env='current',
         vars_to_remove=None,
         initial_vars=None,
-        override_warnings=True,
         target_platform=None,
         start_env_backup_path=None,
         set_current_env=False,
@@ -174,8 +172,7 @@ def build_env(
 
     # Build from configs:
     for config_path in configs_paths:
-        extend_env_with_envconfig(
-            env, target_platform, config_path, override_warnings)
+        extend_env_with_envconfig(env, target_platform, config_path, verbose)
 
     # Force string type
     env = {str(k): str(v) for k, v in env.items()}
@@ -184,7 +181,8 @@ def build_env(
         import sys
         os.environ.clear()
         os.environ.update(env)
-        sys.path.extend(env['PYTHONPATH'].split(os.pathsep))
+        if 'PYTHONPATH' in env:
+            sys.path.extend(env['PYTHONPATH'].split(os.pathsep))
 
     if verbose:  # pragma: no cover
         print_env(env, separator)

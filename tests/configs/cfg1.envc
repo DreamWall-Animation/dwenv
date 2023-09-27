@@ -8,3 +8,5 @@ PLATFORMVAR.windows = windowsvar
 PATH > appended
 
 PATH < prepended
+
+PYTHONPATH = x

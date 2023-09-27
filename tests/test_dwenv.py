@@ -76,7 +76,7 @@ def test_bad_config():
 
 
 def test_override_warning():
-    dwenv.build_env(f'{configs_path}/replace_path.envc')
+    dwenv.build_env(f'{configs_path}/replace_path.envc', verbose=True)
 
 
 def test_add_same_value_twice():
@@ -91,7 +91,7 @@ def test_not_from_current_env(target_platform):
     random_var = list(os.environ.keys())[0]
     assert random_var != 'NEW_VAR'
     env = dwenv.build_env(
-        f'{configs_path}/test_env1.env', start_env=None,
+        f'{configs_path}/test_env1.env', start_env=False,
         target_platform=target_platform)
     assert env['NEW_VAR'] == 'test'
     assert env['PATH'].endswith('appended')
@@ -145,5 +145,5 @@ def test_selected_vars():
     assert env[var] == value
     env = dwenv.build_env(
         f'{configs_path}/test_env1.env', initial_vars=[var])
-    assert len(env) == 5
+    assert len(env) == 6
     assert env[var] == value
