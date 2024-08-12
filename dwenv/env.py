@@ -57,29 +57,30 @@ def get_start_env(
     return env
 
 
-def _expand_and_check_exists(config_path):
-    config_path = os.path.expandvars(config_path)
+def _expand_and_check_exists(config_path, env):
+    config_path = expand_variables(config_path, env)
     if not os.path.exists(config_path):
         raise FileNotFoundError(f'Config file missing: {config_path}')
     return config_path
 
 
-def conform_configs_paths_var(configs_paths):
+def conform_configs_paths_var(configs_paths, env):
     """
     returns list of .envc files.
     if configs_paths is a single .env file, it will return its content.
     if it's is a single .envc file, it will return it as a single item list.
     """
     if isinstance(configs_paths, (list, set, tuple)):
-        return [_expand_and_check_exists(p) for p in configs_paths if p]
+        return [_expand_and_check_exists(p, env) for p in configs_paths if p]
     elif configs_paths.endswith('.envc'):
-        configs_paths = _expand_and_check_exists(configs_paths)
+        configs_paths = _expand_and_check_exists(configs_paths, env)
         return [configs_paths]
     elif configs_paths.endswith('.env'):
-        configs_paths = _expand_and_check_exists(configs_paths)
+        configs_paths = _expand_and_check_exists(configs_paths, env)
         with open(configs_paths, 'r') as f:
             return [
-                _expand_and_check_exists(ln.strip()) for ln in f.readlines() if
+                _expand_and_check_exists(ln.strip(), env)
+                for ln in f.readlines() if
                 ln.strip() and
                 not ln.startswith(COMMENT_SYMBOLS)]
     else:
@@ -176,7 +177,7 @@ def build_env(
     elif isinstance(configs_paths, str):
         env['DWENV_CONFIG'] = configs_paths
 
-    configs_paths = conform_configs_paths_var(configs_paths)
+    configs_paths = conform_configs_paths_var(configs_paths, env)
 
     # Build from configs:
     for config_path in configs_paths:
