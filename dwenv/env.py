@@ -58,7 +58,7 @@ def get_start_env(
 
 
 def _expand_and_check_exists(config_path, env):
-    config_path = expand_variables(config_path, env)
+    config_path = os.path.expandvars(expand_variables(config_path, env))
     if not os.path.exists(config_path):
         raise FileNotFoundError(f'Config file missing: {config_path}')
     return config_path
