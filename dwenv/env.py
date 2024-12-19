@@ -7,6 +7,7 @@ import os
 import re
 import json
 from platform import system
+from six import string_types  # Compatibility for Python 2 and 3
 
 
 PLATFORM = system().lower()
@@ -37,7 +38,7 @@ def get_start_env(
         env = os.environ.copy()
     elif isinstance(start_env, dict):
         env = start_env
-    elif isinstance(start_env, basestring):  # Changed str to basestring
+    elif isinstance(start_env, string_types):
         with open(os.path.expandvars(start_env), 'r') as f:
             env = json.load(f)
     else:
@@ -56,11 +57,13 @@ def get_start_env(
 
     return env
 
+
 def _expand_and_check_exists(config_path, env):
     config_path = os.path.expandvars(expand_variables(config_path, env))
     if not os.path.exists(config_path):
-        raise IOError('Config file missing: {}'.format(config_path))  # Changed FileNotFoundError to IOError
+        raise IOError('Config file missing: {}'.format(config_path))
     return config_path
+
 
 def conform_configs_paths_var(configs_paths, env):
     """
@@ -84,6 +87,7 @@ def conform_configs_paths_var(configs_paths, env):
     else:
         raise ValueError('Wrong extension for configs_paths')
 
+
 def format_env(env=None, separator=None):  # pragma: no cover
     env = env or os.environ
     separator = separator or get_separator()
@@ -96,8 +100,10 @@ def format_env(env=None, separator=None):  # pragma: no cover
             env_str += '\n - ' + path
     return env_str
 
+
 def print_env(env=None, separator=None):  # pragma: no cover
-    print format_env(env, separator)  # Changed print to Python 2 print statement
+    print(format_env(env, separator))
+
 
 def extend_env_with_envconfig(env, target_platform, config_path, verbose=True):
 
@@ -130,9 +136,10 @@ def extend_env_with_envconfig(env, target_platform, config_path, verbose=True):
             value = expand_variables(value, env)
             if operator == ' = ':
                 if verbose and variable in env:
-                    print (
+                    print(
                         'WARNING: "{}" '
-                        'replacing existing variable "{}".'.format(os.path.basename(config_path), variable))
+                        'replacing existing variable "{}".'.format(
+                            os.path.basename(config_path), variable))
                 env[variable] = value
             else:
                 # Check that variable exists:
@@ -147,6 +154,7 @@ def extend_env_with_envconfig(env, target_platform, config_path, verbose=True):
                     env[variable] += separator + value
                 elif operator == ' < ':
                     env[variable] = value + separator + env[variable]
+
 
 def build_env(
         configs_paths=None,
@@ -168,7 +176,7 @@ def build_env(
     if configs_paths is None:
         # Use DWENV_CONFIG value if no configs_paths provided:
         configs_paths = os.environ['DWENV_CONFIG']
-    elif isinstance(configs_paths, basestring):  # Changed str to basestring
+    elif isinstance(configs_paths, string_types):
         env['DWENV_CONFIG'] = configs_paths
 
     configs_paths = conform_configs_paths_var(configs_paths, env)
