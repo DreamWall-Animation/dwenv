@@ -7,7 +7,11 @@ import os
 import re
 import json
 from platform import system
-from six import string_types  # Compatibility for Python 2 and 3
+
+try:
+    string_type = basestring
+except NameError:
+    string_type = str
 
 
 PLATFORM = system().lower()
@@ -38,7 +42,7 @@ def get_start_env(
         env = os.environ.copy()
     elif isinstance(start_env, dict):
         env = start_env
-    elif isinstance(start_env, string_types):
+    elif isinstance(start_env, string_type):
         with open(os.path.expandvars(start_env), 'r') as f:
             env = json.load(f)
     else:
@@ -176,7 +180,7 @@ def build_env(
     if configs_paths is None:
         # Use DWENV_CONFIG value if no configs_paths provided:
         configs_paths = os.environ['DWENV_CONFIG']
-    elif isinstance(configs_paths, string_types):
+    elif isinstance(configs_paths, string_type):
         env['DWENV_CONFIG'] = configs_paths
 
     configs_paths = conform_configs_paths_var(configs_paths, env)
